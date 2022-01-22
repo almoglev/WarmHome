@@ -8,7 +8,7 @@ function Explore() {
   return (
     <div className='explore'>
       <header>
-        <p className="pageHeader"><FaHome size='25px' fill='#ff6039'/>
+        <p className="exploreHeader"><FaHome size='25px' fill='#ff6039'/>
         &nbsp;
         WarmHome
         </p>
@@ -18,13 +18,13 @@ function Explore() {
         {/* slider */}
         <p className="exploreCategoryHeading">Categories</p>
         <div className="exploreCategories">
-          <Link to="/categories/rent">
+          <Link to="/category/rent">
             <img src={rentCategoryImage} alt ="rent" className='exploreCategoryImg'/>
             <p className="exploreCategoryName">Places for rent</p>
           </Link>
 
-          <Link to="/categories/sell">
-            <img src={sellCategoryImage} alt ="sell" className='exploreCategoryImg'/>
+          <Link to="/category/sale">
+            <img src={sellCategoryImage} alt ="sale" className='exploreCategoryImg'/>
             <p className="exploreCategoryName">Places for sale</p>
           </Link>
         </div>

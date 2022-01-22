@@ -8,7 +8,11 @@ export const PrivateRoute = () => {
     const {loggedIn, checkingStatus} = useAuthStatus()
 
     if (checkingStatus) {
-            return <SpinnerSVG />
+            return (
+              <div className='spinnerCenter'>
+                <SpinnerSVG />
+              </div>
+            )
     }
  
   return loggedIn ? <Outlet /> : <Navigate to='/sign-in' />;
