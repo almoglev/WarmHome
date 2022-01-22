@@ -137,6 +137,14 @@ button {
 .pageHeader {
   font-size: 2rem;
   font-weight: 800;
+  color:#ff6a1a;
+  /*background: -webkit-linear-gradient(#e95100, hsl(36, 100%, 76%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; */
+
+  background-image: linear-gradient(60deg, #ff6039, #ffd698);
+  background-clip: text;
+  color: transparent;
 }
 
 .navbar {
