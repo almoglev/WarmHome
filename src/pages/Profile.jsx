@@ -34,6 +34,7 @@ function Profile() {
         await updateDoc(userRef, {
           name: name
         })
+        toast.success('Profile details updated successfully')
       }
 
     } catch (error) {
