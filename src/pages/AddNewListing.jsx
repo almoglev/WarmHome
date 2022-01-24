@@ -66,34 +66,39 @@ function AddNewListing() {
         let geoLocation = {}
         let location
         
-        if (geolocationEnabled) {
             // fetch lat and long from positionstack
             const response = await fetch(
                 `http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEOCODE_API_KEY}&query=${address}`
               );
 
-              const data = await response.json();
-              setFormData((prevState) => ({
-                ...prevState,
-                latitude: data.data[0]?.latitude ?? 0,
-                longitude: data.data[0]?.longitude ?? 0,
-                }),
-                location = 
+            const data = await response.json();
+
+            // verify the address
+            const  resLocation = 
                     data.data[0] 
                     ? data.data[0]?.label 
                     : undefined
-            );
- 
-            if(location === undefined || location.includes('undefined')){
+            if(resLocation === undefined || resLocation.includes('undefined')){
                 setLoading(false)
                 toast.error('Please insert a correct address')
                 return
             }
-        } else {
-            geoLocation.lat = latitude
-            geoLocation.lng = longitude
-            location = address
-        }
+
+            if(geolocationEnabled){
+                setFormData((prevState) => ({
+                    ...prevState,
+                    latitude: data.data[0]?.latitude ?? 0,
+                    longitude: data.data[0]?.longitude ?? 0,
+                    }),
+                    location = address
+                ); 
+            } else {
+                geoLocation.lat = latitude
+                geoLocation.lng = longitude
+                location = address
+            }
+
+            console.log(geoLocation, location)
         
         setLoading(false)
     }
