@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as SpinnerSVG } from '../assets/svg/spinner.svg';
+import { toast } from 'react-toastify'
 
 function AddNewListing() {
     const [geolocationEnabled, setGeolocationEnabled] = useState(true)
@@ -45,9 +46,56 @@ function AddNewListing() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMounted])
 
-    const onSubmit = (e) => {
+    // turn the address to lat,long + image upload + submit to Firebase
+    const onSubmit = async (e) => {
         e.preventDefault()
-        console.log(formData)
+        setLoading(true)
+        
+        if (parseInt(regularPrice) <= parseInt(discountedPrice)) {
+            setLoading(false)
+            toast.error('Discounted price must be less than regular price')
+            return
+        }
+
+        if (images.length > 6){
+            setLoading(false)
+            toast.error('Please upload up to 6 images')
+            return
+        }
+        
+        let geoLocation = {}
+        let location
+        
+        if (geolocationEnabled) {
+            // fetch lat and long from positionstack
+            const response = await fetch(
+                `http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEOCODE_API_KEY}&query=${address}`
+              );
+
+              const data = await response.json();
+              setFormData((prevState) => ({
+                ...prevState,
+                latitude: data.data[0]?.latitude ?? 0,
+                longitude: data.data[0]?.longitude ?? 0,
+                }),
+                location = 
+                    data.data[0] 
+                    ? data.data[0]?.label 
+                    : undefined
+            );
+ 
+            if(location === undefined || location.includes('undefined')){
+                setLoading(false)
+                toast.error('Please insert a correct address')
+                return
+            }
+        } else {
+            geoLocation.lat = latitude
+            geoLocation.lng = longitude
+            location = address
+        }
+        
+        setLoading(false)
     }
 
     // fires off when we click on a button, type in a text field or submit a file
