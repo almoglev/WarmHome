@@ -40,7 +40,7 @@ function ListingItem( { listing, id, onDelete} ) {
 
                       <img src={bathroomIcon} alt="bathroom" />
                       <p className="categoryListingInfoText">
-                          { listing.bathrooms > 1 ? `${listing.bathrooms} bathrooms` : "1 bathroom"}
+                          { listing.bathrooms > 1 ? `${listing.bathrooms} Bathrooms` : "1 Bathroom"}
                       </p>
                   </div>
               </div>
