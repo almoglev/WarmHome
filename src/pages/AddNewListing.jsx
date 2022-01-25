@@ -4,13 +4,14 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as SpinnerSVG } from '../assets/svg/spinner.svg';
 import { toast } from 'react-toastify';
-import { geoStorage, ref, uploadBytesResumable, getDowbloadURL, getStorage, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getStorage, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase.config';
 import { v4 as uuidv4} from 'uuid';
 
 
 function AddNewListing() {
-    const [geolocationEnabled, setGeolocationEnabled] = useState(true)
+    const [geolocationEnabled, setGeolocationEnabled] = useState(false)
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         type: 'rent', // default is rent. can be changed later to sale
@@ -67,9 +68,6 @@ function AddNewListing() {
             return
         }
         
-        let geoLocation = {}
-        let location
-        
         // fetch lat and long from positionstack
         const response = await fetch(
             `http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEOCODE_API_KEY}&query=${address}`
@@ -87,6 +85,7 @@ function AddNewListing() {
             toast.error('Please insert a correct address')
             return
         }
+        let geoLocation = {}
 
         if(geolocationEnabled){
             setFormData((prevState) => ({
@@ -94,13 +93,17 @@ function AddNewListing() {
                 latitude: data.data[0]?.latitude ?? 0,
                 longitude: data.data[0]?.longitude ?? 0,
                 }),
-                location = address
-            ); 
+                //location = address
+            );
+            geoLocation.lat = data.data[0]?.latitude ?? 0
+            geoLocation.lng = data.data[0]?.longitude ?? 0
         } else {
-            geoLocation.lat = latitude
-            geoLocation.lng = longitude
-            location = address
+            geoLocation.lat = formData.latitude
+            geoLocation.lng = formData.longitude
         }
+        console.log(data.data[0]?.latitude ?? 0, geoLocation.lat)
+
+        let location = address
 
         // Store images in firebase
         const storeImage = async (image) => {
@@ -137,7 +140,7 @@ function AddNewListing() {
             })
         }
         
-        const imgUrls = await Promise.all(
+        const imageUrls = await Promise.all(
             [...images].map((image)=> storeImage(image))
         ).catch(()=>{
             setLoading(false)
@@ -145,9 +148,22 @@ function AddNewListing() {
             return
         })
 
-        console.log(imgUrls)
+        const formDataCopy = {
+            ...formData,
+            imageUrls,
+            geoLocation,
+            timestamp: serverTimestamp()
+        }
 
+        delete formDataCopy.images
+        delete formDataCopy.address
+        location && (formDataCopy.location = location)
+        !formDataCopy.offer && delete formDataCopy.discountedPrice
+
+        const docRef = await addDoc(collection(db, 'listings'), formDataCopy)
         setLoading(false)
+        toast.success('Listing saved')
+        navigate(`/category/${formDataCopy.type}/${docRef.id}`)
     }
 
     // fires off when we click on a button, type in a text field or submit a file
