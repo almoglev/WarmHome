@@ -3,7 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as SpinnerSVG } from '../assets/svg/spinner.svg';
-import { toast } from 'react-toastify'
+import { toast } from 'react-toastify';
+import { geoStorage, ref, uploadBytesResumable, getDowbloadURL, getStorage, getDownloadURL } from 'firebase/storage';
+import { db } from '../firebase.config';
+import { v4 as uuidv4} from 'uuid';
+
 
 function AddNewListing() {
     const [geolocationEnabled, setGeolocationEnabled] = useState(true)
@@ -66,46 +70,88 @@ function AddNewListing() {
         let geoLocation = {}
         let location
         
-            // fetch lat and long from positionstack
-            const response = await fetch(
-                `http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEOCODE_API_KEY}&query=${address}`
-              );
+        // fetch lat and long from positionstack
+        const response = await fetch(
+            `http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEOCODE_API_KEY}&query=${address}`
+            );
 
-            const data = await response.json();
+        const data = await response.json();
 
-            // verify the address
-            const  resLocation = 
-                    data.data[0] 
-                    ? data.data[0]?.label 
-                    : undefined
-            if(resLocation === undefined || resLocation.includes('undefined')){
-                setLoading(false)
-                toast.error('Please insert a correct address')
-                return
-            }
+        // verify the address
+        const  resLocation = 
+                data.data[0] 
+                ? data.data[0]?.label 
+                : undefined
+        if(resLocation === undefined || resLocation.includes('undefined')){
+            setLoading(false)
+            toast.error('Please insert a correct address')
+            return
+        }
 
-            if(geolocationEnabled){
-                setFormData((prevState) => ({
-                    ...prevState,
-                    latitude: data.data[0]?.latitude ?? 0,
-                    longitude: data.data[0]?.longitude ?? 0,
-                    }),
-                    location = address
-                ); 
-            } else {
-                geoLocation.lat = latitude
-                geoLocation.lng = longitude
+        if(geolocationEnabled){
+            setFormData((prevState) => ({
+                ...prevState,
+                latitude: data.data[0]?.latitude ?? 0,
+                longitude: data.data[0]?.longitude ?? 0,
+                }),
                 location = address
-            }
+            ); 
+        } else {
+            geoLocation.lat = latitude
+            geoLocation.lng = longitude
+            location = address
+        }
 
-            console.log(geoLocation, location)
+        // Store images in firebase
+        const storeImage = async (image) => {
+            return new Promise((resolve, reject) => {
+                const storage = getStorage()
+                const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
+
+                const storageRef = ref(storage, 'images/' + fileName)
+                const uploadTask = uploadBytesResumable(storageRef, image)
+                uploadTask.on(
+                    'state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                        console.log('Upload is ' + progress + '% done')
+                        switch (snapshot.state) {
+                            case 'paused':
+                                console.log('Upload is paused')
+                                break
+                            case 'running':
+                                console.log('Upload is running')
+                                break
+                        }
+                    },
+                    (error) => {
+                        reject(error)
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then(
+                        (downloadURL) => {
+                            resolve(downloadURL)
+                        })
+                    }
+                )
+            })
+        }
         
+        const imgUrls = await Promise.all(
+            [...images].map((image)=> storeImage(image))
+        ).catch(()=>{
+            setLoading(false)
+            toast.error('Sorry, could not upload image')
+            return
+        })
+
+        console.log(imgUrls)
+
         setLoading(false)
     }
 
     // fires off when we click on a button, type in a text field or submit a file
     const onMutate = (e) => {
-
         // convert the string into an actual boolean
         let boolean = null
         if (e.target.value === 'true') {
@@ -123,7 +169,7 @@ function AddNewListing() {
         } else { // if it's text/booleans/numbers
             setFormData((prevState)=>({
                 ...prevState,
-                [e.target.id]: boolean ?? e.target.value,//if the value of boolean is null then use what's on the right
+                [e.target.id]: boolean ?? e.target.value, //if the value of boolean is null then use what's on the right
             }))
         }
 
