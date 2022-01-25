@@ -11,7 +11,7 @@ import { v4 as uuidv4} from 'uuid';
 
 
 function AddNewListing() {
-    const [geolocationEnabled, setGeolocationEnabled] = useState(false)
+    const [geolocationEnabled, setGeolocationEnabled] = useState(true)
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         type: 'rent', // default is rent. can be changed later to sale
@@ -101,7 +101,6 @@ function AddNewListing() {
             geoLocation.lat = formData.latitude
             geoLocation.lng = formData.longitude
         }
-        console.log(data.data[0]?.latitude ?? 0, geoLocation.lat)
 
         let location = address
 
