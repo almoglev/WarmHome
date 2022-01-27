@@ -15,7 +15,7 @@ It's a hands-on React with Firebase v9 project I developed while self-learning t
 
 ### Geolocation
 
-The listings use positionstack.com Geocoding REST API to get the coords from the address field. You need to either rename .env.example to .env and add your positionstack API key (it's free) OR in the **CreateListing.jsx** file you can set **geolocationEnabled** to "false" and it will add a latitue & longitude fields to the form.
+The listings use positionstack.com Geocoding REST API to get the coords (latitude and longitude) from the address field.
 
 ### Run
 
