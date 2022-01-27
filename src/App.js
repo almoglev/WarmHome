@@ -12,6 +12,7 @@ import Category from './pages/Category';
 import AddNewListing from './pages/AddNewListing';
 import ShowListing from './pages/ShowListing';
 import ContactLandlord from './pages/ContactLandlord';
+import EditListing from './pages/EditListing';
 import { PrivateRoute } from './components/PrivateRoute';
 
 
@@ -27,6 +28,7 @@ function App() {
             <Route path='/profile' element={<Profile />} />
         </Route>
         <Route path='/create-listing' element={<AddNewListing />} />
+        <Route path='/edit-listing/:listingId' element={<EditListing />} />
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SignUp />} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
