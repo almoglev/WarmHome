@@ -11,6 +11,7 @@ import { v4 as uuidv4} from 'uuid';
 
 
 function AddNewListing() {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const [geolocationEnabled, setGeolocationEnabled] = useState(true)
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
@@ -124,6 +125,8 @@ function AddNewListing() {
                             case 'running':
                                 console.log('Upload is running')
                                 break
+                            default:
+                                break
                         }
                     },
                     (error) => {
@@ -161,7 +164,7 @@ function AddNewListing() {
 
         const docRef = await addDoc(collection(db, 'listings'), formDataCopy)
         setLoading(false)
-        toast.success('Listing saved')
+        toast.success('Listing added successfully')
         navigate(`/category/${formDataCopy.type}/${docRef.id}`)
     }
 

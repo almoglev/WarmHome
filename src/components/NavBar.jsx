@@ -10,8 +10,7 @@ function NavBar() {
     const location = useLocation()
 
     const pathMatchRoute = (route) => {
-        //#ff9a03
-        return route == location.pathname
+        return route === location.pathname
     }
 
     return <footer className='navbar'>

@@ -43,6 +43,10 @@ function Slider() {
             </div>
         )
     }
+
+    if (listings === null || listings === undefined || listings.length === 0) {
+        return <></>
+    }
     
     const getPriceWithComma = (price) => {
         return price.toString()
