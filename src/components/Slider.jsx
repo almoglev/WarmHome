@@ -11,7 +11,7 @@ SwiperCore.use([Navigation, Pagination, Scrollbar, A11y])
 
 function Slider() {
     const [loading, setLoading] = useState(true)
-    const [listings, setlistings] = useState(null)
+    const [listings, setListings] = useState(null)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -29,7 +29,7 @@ function Slider() {
                     data: doc.data()
                 })
             })            
-            setlistings(listings)
+            setListings(listings)
             setLoading(false)
         }
 
